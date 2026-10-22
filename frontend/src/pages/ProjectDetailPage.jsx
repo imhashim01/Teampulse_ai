@@ -5,7 +5,7 @@ import { Plus, UserPlus, ListChecks, Activity, Users, Pencil, X, Crown, ArrowLef
 import toast from "react-hot-toast";
 import classNames from "classnames";
 import { api, errMsg } from "../lib/api";
-import { Modal, EmptyState, SkeletonCards, StatusPill, PriorityPill, DeadlineChip, AvatarStack, Avatar, ProgressBar, fmtDate, timeAgo, fadeIn } from "../components/ui";
+import { Modal, EmptyState, SkeletonCards, StatusPill, PriorityPill, DeadlineChip, AvatarStack, Avatar, ProgressBar, Pill, fmtDate, timeAgo, fadeIn } from "../components/ui";
 import { ProjectForm } from "./ProjectsPage";
 import { describeWhatsApp } from "../lib/whatsapp";
 
@@ -81,7 +81,7 @@ const AddMember = ({ projectId, onAdded }) => {
 
   return (
     <div>
-      <p className="text-sm text-muted mb-3">Search registered users by email. They will see this project right away.</p>
+      <p className="text-sm text-muted mb-3">Search registered users by email. They will see this project right away and get a WhatsApp message if they have verified their number.</p>
       <div className="flex gap-2">
         <input className="field" value={email} onChange={(e) => setEmail(e.target.value)} placeholder="teammate@company.com" />
         <button className="btn-primary" disabled={adding || !email.includes("@")} onClick={() => add(email)}>Add</button>
@@ -201,6 +201,9 @@ const ProjectDetailPage = () => {
               <div key={m._id} className="flex items-center gap-3 px-4 py-3">
                 <Avatar user={m} />
                 <div className="flex-1 min-w-0"><p className="text-sm font-medium text-ink">{m.name}</p><p className="text-xs text-muted truncate">{m.email}</p></div>
+                {m.whatsappVerified && m.whatsappOptIn
+                  ? <Pill className="bg-emerald-50 text-emerald-700" title="Gets WhatsApp notifications">WhatsApp</Pill>
+                  : <Pill className="bg-slate-100 text-slate-500" title="Has not verified a WhatsApp number or turned it off">No WhatsApp</Pill>}
                 {m._id === project.lead._id ? <span className="text-xs text-accent flex items-center gap-1"><Crown size={13} />Lead</span> : <span className="text-xs text-muted">Member</span>}
                 {isLead && m._id !== project.lead._id && <button className="btn-ghost px-2" onClick={() => removeMember(m._id)} aria-label="Remove"><X size={15} /></button>}
               </div>

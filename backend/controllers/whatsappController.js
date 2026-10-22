@@ -10,11 +10,14 @@ const SEND_ERRORS = {
     config_missing: "WhatsApp is not configured on the server yet.",
     template_not_configured: "The WhatsApp verification template is not configured on the server yet.",
     invalid_recipient: "WhatsApp could not deliver to this number. Check that it is a WhatsApp number in international format.",
+    recipient_not_allowed: "This server uses a Meta test number, which can only message numbers on its allowed list. An administrator must add this number in Meta (WhatsApp > API Setup > To).",
     auth_invalid: "The server's WhatsApp access token is invalid or expired.",
     rate_limited: "WhatsApp is rate limiting messages right now. Please try again in a few minutes.",
     timeout: "WhatsApp did not respond in time. Please try again.",
     network_error: "Could not reach WhatsApp. Please try again.",
     permission_denied: "The server's WhatsApp account is not allowed to message this number yet.",
+    outside_24h_window: "WhatsApp only delivers plain messages if you messaged our WhatsApp number in the last 24 hours. Send it a message first, or ask an administrator to set up the verification template.",
+    template_error: "The WhatsApp verification template is not set up correctly on the server.",
 };
 
 const VERIFY_ERRORS = {
@@ -43,7 +46,14 @@ const statusFor = (user) => {
             attemptsLeft: Math.max(0, cfg.otp.maxAttempts - (user.whatsappOtpAttempts || 0)),
             resendAvailableAt: resendAt,
         } : null,
-        server: { mode: whatsappMode(cfg), devCodeInServerLog: whatsappMode(cfg) === "disabled" && cfg.devLogOtp },
+        server: {
+            mode: whatsappMode(cfg),
+            devCodeInServerLog: cfg.devLogOtp,
+            // Without an approved template, codes go out as plain text, which WhatsApp only delivers
+            // to people who messaged the business number in the last 24 hours
+            codesAsPlainText: whatsappMode(cfg) === "live" && !cfg.templates.verification.name && cfg.freeformFallback,
+            businessNumber: process.env.WHATSAPP_BUSINESS_DISPLAY_NUMBER || null,
+        },
     };
 };
 
@@ -94,11 +104,17 @@ const issueCode = async (user, phone, res) => {
     await user.save(); // counts toward the limits even if sending fails
 
     const ttlMinutes = Math.round(cfg.otp.ttlSeconds / 60);
-    if (whatsappMode(cfg) === "disabled" && cfg.devLogOtp) {
-        // Local development only (never in production): there is no WhatsApp to deliver the code.
+    if (cfg.devLogOtp) {
+        // Local development only (config ignores this flag in production)
         console.log(`[whatsapp:dev] Verification code for user ${user._id}: ${code} (WHATSAPP_DEV_LOG_OTP=true)`);
-    } else {
+    }
+    if (whatsappMode(cfg) === "live") {
         const delivery = await sendVerificationCode({ userId: user._id, phone, code, ttlMinutes });
+        if (delivery.status === "Failed" && cfg.devLogOtp) {
+            // Development only: the code was printed in the server console, so keep it usable
+            const reason = SEND_ERRORS[delivery.errorCategory] || "WhatsApp could not deliver the code.";
+            return res.status(200).json({ success: true, message: `${reason} Development mode: use the code printed in the backend console.`, data: statusFor(user) });
+        }
         if (delivery.status === "Failed") {
             user.whatsappOtpHash = undefined; // the code never arrived, so it must not be usable
             await user.save();

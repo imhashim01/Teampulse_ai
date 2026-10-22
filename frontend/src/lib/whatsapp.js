@@ -6,6 +6,7 @@ export const WA_REASONS = {
   template_not_configured: "the WhatsApp template is not configured on the server",
   config_missing: "WhatsApp is not configured on the server",
   invalid_recipient: "WhatsApp could not deliver to their number",
+  recipient_not_allowed: "their number is not on the Meta test number's allowed list",
   auth_invalid: "the server's WhatsApp token is invalid or expired",
   rate_limited: "WhatsApp is rate limiting, it will be retried",
   timeout: "WhatsApp timed out, it will be retried",

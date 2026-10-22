@@ -39,7 +39,8 @@ export const whatsappConfig = () => {
         // Free-form text only reaches a user inside Meta's 24-hour customer-service window.
         // Off by default: without a template, business-initiated messages fail with a clear error.
         freeformFallback: bool(e.WHATSAPP_FREEFORM_FALLBACK, false),
-        // Local development only: print the OTP to the server console when WhatsApp is disabled.
+        // Local development only (ignored when NODE_ENV=production): also print the OTP in the server console,
+        // e.g. while a sandbox account cannot deliver it.
         devLogOtp: bool(e.WHATSAPP_DEV_LOG_OTP, false) && e.NODE_ENV !== "production",
         requestTimeoutMs: int(e.WHATSAPP_REQUEST_TIMEOUT_MS, 5000),
         maxSendRetries: int(e.WHATSAPP_MAX_SEND_RETRIES, 1), // inline retries; later retries run from the cron job

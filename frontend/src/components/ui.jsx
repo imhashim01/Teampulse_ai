@@ -43,8 +43,8 @@ const LEVEL_STYLES = {
   Low: "bg-emerald-50 text-emerald-700 ring-emerald-100",
 };
 
-export const Pill = ({ className, children }) => (
-  <span className={classNames("inline-flex items-center gap-1 rounded-full px-2.5 py-0.5 text-xs font-medium whitespace-nowrap", className)}>
+export const Pill = ({ className, children, title }) => (
+  <span title={title} className={classNames("inline-flex items-center gap-1 rounded-full px-2.5 py-0.5 text-xs font-medium whitespace-nowrap", className)}>
     {children}
   </span>
 );

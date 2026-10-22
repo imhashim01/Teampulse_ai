@@ -209,7 +209,8 @@ A quick local option without WhatsApp: set `WHATSAPP_DEV_LOG_OTP=true` with `WHA
 | `auth_invalid` (code 190) | The token expired (temporary tokens last about 24 hours). Create a system user token. |
 | `template_not_configured` | Set the `*_TEMPLATE_NAME` for that message type. |
 | `template_error` (132xxx) | The name, language or number of parameters doesn't match the approved template. Compare with section 4. |
-| `invalid_recipient` (131026) | The number isn't on WhatsApp, or isn't in the test-number "To" list during development. |
+| `recipient_not_allowed` (131030) | You are using Meta's test number: add the recipient in **API Setup → "To"** (up to 5 numbers) and confirm it. |
+| `invalid_recipient` (131026) | The number isn't on WhatsApp. |
 | `outside_24h_window` (131047) | You sent free-form text. Use a template. |
 | `rate_limited` | Retried automatically. Lower the volume or request higher limits. |
 | Stuck on `Accepted` | The webhook isn't configured or isn't subscribed to `messages`. |

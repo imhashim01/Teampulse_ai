@@ -38,7 +38,12 @@ const Settings = () => {
   const [confirmRemove, setConfirmRemove] = useState(false);
 
   const load = useCallback(async () => {
-    try { const r = await api.get("/user/whatsapp"); setWa(r.data.data); } catch (e) { setError(errMsg(e)); }
+    try {
+      const r = await api.get("/user/whatsapp");
+      setWa(r.data.data);
+      // A number saved before verification existed: offer it for verification
+      if (!r.data.data.verified && r.data.data.phone) setPhone((p) => p || r.data.data.phone);
+    } catch (e) { setError(errMsg(e)); }
   }, []);
   useEffect(() => { load(); }, [load]);
 
@@ -130,6 +135,9 @@ const Settings = () => {
 
         {showNumberForm && !awaitingCode && (
           <form onSubmit={start} className="space-y-4">
+            {!wa?.verified && wa?.phone && !changing && (
+              <p className="text-sm text-ink rounded-lg border border-line bg-canvas p-3">Your saved number <span className="font-medium">{wa.phone}</span> has not been verified yet. Verify it to start receiving WhatsApp notifications.</p>
+            )}
             <div>
               <label className="label">WhatsApp number</label>
               <div className="relative">
@@ -154,6 +162,16 @@ const Settings = () => {
             <p className="text-sm text-ink">Enter the 6-digit code we sent to <span className="font-medium">{wa.pending.phone}</span> on WhatsApp.</p>
             <input className="field text-center tracking-[0.5em] text-lg font-semibold" value={code} maxLength={6} inputMode="numeric" autoComplete="one-time-code"
               onChange={(e) => setCode(e.target.value.replace(/\D/g, ""))} placeholder="••••••" autoFocus />
+            {wa.server?.devCodeInServerLog && (
+              <p className="text-xs text-muted">Development mode: the code is also printed in the backend console.</p>
+            )}
+            {wa.server?.codesAsPlainText && (
+              <div className="rounded-lg border border-line bg-canvas p-3 text-xs text-muted">
+                Didn't get it? This server sends codes as a plain WhatsApp message, which only arrives if you have messaged
+                {wa.server.businessNumber ? <> our number <span className="font-medium text-ink">{wa.server.businessNumber}</span></> : " our WhatsApp number"} in the last 24 hours.
+                Send it any message (e.g. "hi"), then tap Resend code.
+              </div>
+            )}
             <div className="flex flex-wrap items-center justify-between gap-2 text-xs text-muted">
               <span>Expires in {fmtSecs(expiresIn)} · {wa.pending.attemptsLeft} attempt{wa.pending.attemptsLeft === 1 ? "" : "s"} left</span>
               <button type="button" className="inline-flex items-center gap-1 text-accent disabled:text-muted" onClick={resend} disabled={resendIn > 0 || busy === "resend"}>

@@ -30,7 +30,8 @@ export const classifyError = (httpStatus, err = {}) => {
     const code = Number(err.code);
     if (httpStatus === 401 || code === 190) return { category: "auth_invalid", retryable: false };
     if ([4, 80007, 130429, 131048, 131056].includes(code) || httpStatus === 429) return { category: "rate_limited", retryable: true };
-    if (code === 131026 || code === 131030) return { category: "invalid_recipient", retryable: false };
+    if (code === 131030) return { category: "recipient_not_allowed", retryable: false }; // test number: not in the allowed list
+    if (code === 131026) return { category: "invalid_recipient", retryable: false };
     if (code === 131047) return { category: "outside_24h_window", retryable: false };
     if (code >= 132000 && code <= 132069) return { category: "template_error", retryable: false };
     if (code === 131051 || code === 131008 || code === 131009 || code === 100) return { category: "bad_request", retryable: false };

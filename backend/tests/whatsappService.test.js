@@ -87,6 +87,7 @@ test("timeouts are categorized and retried", async () => {
 
 test("error classification", () => {
     assert.equal(classifyError(400, { code: 131026 }).category, "invalid_recipient");
+    assert.equal(classifyError(400, { code: 131030 }).category, "recipient_not_allowed");
     assert.equal(classifyError(429, { code: 130429 }).category, "rate_limited");
     assert.equal(classifyError(400, { code: 131047 }).category, "outside_24h_window");
     assert.equal(classifyError(500, {}).retryable, true);

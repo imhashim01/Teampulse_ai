@@ -51,7 +51,7 @@ export const createProject = async (req, res) => {
 
 export const getProject = async (req, res) => {
     try {
-        const project = await Project.findById(req.project._id).populate("lead", USER_FIELDS).populate("members", USER_FIELDS);
+        const project = await Project.findById(req.project._id).populate("lead", USER_FIELDS).populate("members", `${USER_FIELDS} whatsappVerified whatsappOptIn`);
         res.status(200).json({ success: true, data: { ...project.toObject(), isLead: req.isLead } });
     } catch (error) {
         res.status(500).json({ success: false, message: error.message });
