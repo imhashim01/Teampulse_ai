@@ -9,7 +9,7 @@ const NAV = [
   { to: '/dashboard', label: 'Dashboard', icon: LayoutDashboard },
   { to: '/projects', label: 'Projects', icon: FolderKanban },
   { to: '/my-tasks', label: 'My Tasks', icon: ListChecks },
-  { to: '/ji-sir', label: 'Ji Sir Detector', icon: Radar },
+  { to: '/risk-radar', label: 'Risk Radar', icon: Radar },
   { to: '/notifications', label: 'Notifications', icon: Bell },
   { to: '/settings', label: 'Settings', icon: Settings },
 ];

@@ -1,4 +1,4 @@
-// Deterministic "Ji Sir" rule engine. Works without any AI key.
+// Deterministic Risk Radar rule engine. Works without any AI key.
 // It only looks at recorded facts: check-ins, task status, deadline and revision rounds.
 // It never infers emotions, burnout or mental state, and never uses activity times as evidence.
 

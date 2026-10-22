@@ -86,7 +86,7 @@ const run = async () => {
     const mkCheckIn = (data) => CheckIn.create([{ project: P, isDemo: true, ...data, updatedAt: data.createdAt }], { timestamps: false }).then((r) => r[0]);
     const mkActivity = (data) => ActivityEvent.create([{ project: P, isDemo: true, ...data, updatedAt: data.createdAt }], { timestamps: false });
 
-    // 1) The Ji Sir case: Ali says "almost done" but nothing has moved for 3 days
+    // 1) The hidden-blocker case: Ali says "almost done" but nothing has moved for 3 days
     const payment = await mkTask({
         title: "Payment API integration",
         description: "Integrate JazzCash + card payments in checkout. Expected outcome: successful sandbox payment end to end with order confirmation.",

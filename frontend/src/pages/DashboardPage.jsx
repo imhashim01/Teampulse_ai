@@ -76,9 +76,9 @@ const DashboardPage = () => {
           </div>
 
           <div className="grid lg:grid-cols-2 gap-4 mb-6">
-            <Section title="Ji Sir Detector" icon={Radar} action={<Link to="/ji-sir" className="text-xs text-accent hover:underline">Open</Link>}>
+            <Section title="Risk Radar" icon={Radar} action={<Link to="/risk-radar" className="text-xs text-accent hover:underline">Open</Link>}>
               {lead.riskItems.length === 0 ? <Empty text="No at-risk tasks right now. Open the detector to run an analysis." /> : lead.riskItems.map((r) => (
-                <Link key={r._id} to="/ji-sir" className="flex items-center gap-3 rounded-lg px-3 py-2.5 hover:bg-canvas">
+                <Link key={r._id} to="/risk-radar" className="flex items-center gap-3 rounded-lg px-3 py-2.5 hover:bg-canvas">
                   <Avatar user={r.member} />
                   <div className="min-w-0 flex-1">
                     <p className="text-sm font-medium text-ink truncate">{r.task?.title}</p>

@@ -18,7 +18,7 @@ import ProjectsPage from "./pages/ProjectsPage";
 import ProjectDetailPage from "./pages/ProjectDetailPage";
 import TaskDetailPage from "./pages/TaskDetailPage";
 import MyTasksPage from "./pages/MyTasksPage";
-import JiSirPage from "./pages/JiSirPage";
+import RiskRadarPage from "./pages/RiskRadarPage";
 
 // Protected Route Wrapper
 const ProtectedRoute = ({ children }) => {
@@ -47,7 +47,7 @@ const protectedPages = [
   ["projects/:projectId", <ProjectDetailPage key="pd" />],
   ["tasks/:taskId", <TaskDetailPage key="td" />],
   ["my-tasks", <MyTasksPage key="mt" />],
-  ["ji-sir", <JiSirPage key="js" />],
+  ["risk-radar", <RiskRadarPage key="rr" />],
   ["notifications", <NotificationPage key="n" />],
   ["profile", <ProfilePage key="pr" />],
   ["settings", <Settings key="s" />],
@@ -79,6 +79,7 @@ function App() {
             <Route key={path} path={path} element={<ProtectedRoute>{element}</ProtectedRoute>} />
           ))}
           <Route path="notification" element={<Navigate to="/notifications" replace />} />
+          <Route path="ji-sir" element={<Navigate to="/risk-radar" replace />} />
         </Route>
 
         {/* Catch-all Route */}

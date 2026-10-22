@@ -1,6 +1,6 @@
 # TeamPulse AI
 
-Project and task tracking for small teams, with a **"Ji Sir" Detector** that compares what people report with what the records show, so a lead can offer help before a deadline slips. Support, not surveillance.
+Project and task tracking for small teams, with **Risk Radar** that compares what people report with what the records show, so a lead can offer help before a deadline slips. Support, not surveillance.
 
 - `backend/`: Express + Mongoose (ES modules), JWT cookie auth
 - `frontend/`: React 19 + Vite + Tailwind + Zustand
@@ -36,7 +36,7 @@ Optional: set `DEMO_WHATSAPP_NUMBER=+92...` (your own verified number) before se
 
 1. Go to https://aistudio.google.com/apikey and create an API key.
 2. Put it in `backend/.env` as `GEMINI_API_KEY=...` (model defaults to `gemini-2.5-flash`).
-3. Restart the backend, open **Ji Sir Detector** and click **Re-analyze team**. Cards show **AI-assisted**.
+3. Restart the backend, open **Risk Radar** and click **Re-analyze team**. Cards show **AI-assisted**.
 
 The AI only receives computed signals and check-in text, and must pick its evidence from a fixed list of fact IDs, so it cannot invent facts. Any timeout (15 s), error or invalid JSON falls back to the rule engine. Results are cached per task by an input hash, so the AI is only called again when the task's inputs change or the lead clicks Re-analyze. To use Groq/OpenAI instead, set `AI_PROVIDER=groq|openai`, `AI_API_KEY`, `AI_MODEL`.
 
@@ -72,7 +72,7 @@ All responses are `{ success, message?, data }`. Project and task routes go thro
 - `POST /api/jobs/reminders` (cron), `POST /api/jobs/reminders/run` (lead button)
 - `PATCH /api/user/settings` (phone + WhatsApp opt-in), `GET /api/users/search?email=`
 
-## Ji Sir rules (deterministic)
+## Risk Radar rules (deterministic)
 
 | Category | Rule | Level |
 |---|---|---|

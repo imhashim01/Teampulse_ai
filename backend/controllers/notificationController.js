@@ -87,7 +87,7 @@ export const cronReminders = async (req, res) => {
 export const listRisks = async (req, res) => {
     try {
         const projectIds = await leadProjectIds(req.userId);
-        if (!projectIds.length) return res.status(403).json({ success: false, message: "The Ji Sir Detector is for project leads" });
+        if (!projectIds.length) return res.status(403).json({ success: false, message: "Risk Radar is for project leads" });
         const risks = await assessForLead(req.userId, { force: req.body?.force === true });
         res.status(200).json({ success: true, data: { risks, aiConfigured: isAIConfigured() } });
     } catch (error) {

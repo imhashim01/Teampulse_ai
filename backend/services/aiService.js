@@ -1,4 +1,4 @@
-// Single server-side AI entry point for the "Ji Sir" detector.
+// Single server-side AI entry point for Risk Radar.
 // Only computed signals + check-in text are sent. The model must pick evidence from a fixed list
 // of fact IDs, so it cannot invent facts. On missing key / error / invalid JSON the caller falls
 // back to the rule engine ("Rule-based").

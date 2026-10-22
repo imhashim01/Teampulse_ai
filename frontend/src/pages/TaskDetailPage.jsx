@@ -167,7 +167,7 @@ const TaskDetailPage = () => {
         <div className="space-y-5">
           {isLead && (
             <div className="card p-5">
-              <div className="flex items-center justify-between mb-3"><p className="text-sm font-medium text-ink flex items-center gap-2"><Radar size={15} className="text-muted" />Ji Sir check</p>
+              <div className="flex items-center justify-between mb-3"><p className="text-sm font-medium text-ink flex items-center gap-2"><Radar size={15} className="text-muted" />Risk check</p>
                 <button className="btn-ghost px-2 py-1 text-xs" disabled={busy} onClick={() => run(() => api.post(`/tasks/${taskId}/risk`))}><RefreshCw size={13} />Analyze</button>
               </div>
               {risk ? (
@@ -175,7 +175,7 @@ const TaskDetailPage = () => {
                   <div className="flex items-center gap-2 flex-wrap"><LevelBadge level={risk.level} /><span className="text-sm font-medium text-ink">{risk.category}</span></div>
                   <p className="text-sm text-muted mt-2">{risk.explanation}</p>
                   <p className="text-xs text-muted mt-3">{risk.source} · {timeAgo(risk.analyzedAt)}</p>
-                  <Link to="/ji-sir" className="text-xs text-accent hover:underline mt-1 inline-block">Open in Ji Sir Detector</Link>
+                  <Link to="/risk-radar" className="text-xs text-accent hover:underline mt-1 inline-block">Open in Risk Radar</Link>
                 </>
               ) : <p className="text-sm text-muted">Not analyzed yet.</p>}
             </div>

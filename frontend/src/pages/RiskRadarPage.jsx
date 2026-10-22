@@ -111,7 +111,7 @@ const RiskCard = ({ risk, onChanged }) => {
   );
 };
 
-const JiSirPage = () => {
+const RiskRadarPage = () => {
   const [state, setState] = useState({ loading: true, risks: [], aiConfigured: false, error: null });
   const [analyzing, setAnalyzing] = useState(false);
 
@@ -132,7 +132,7 @@ const JiSirPage = () => {
   return (
     <div>
       <motion.div initial={{ opacity: 0, y: 6 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.2 }} className="mb-8">
-        <div className="flex items-center gap-2 text-accent text-sm font-medium mb-3"><Radar size={16} />Ji Sir Detector</div>
+        <div className="flex items-center gap-2 text-accent text-sm font-medium mb-3"><Radar size={16} />Risk Radar</div>
         <h1 className="text-2xl sm:text-[28px] font-semibold tracking-tight text-ink leading-snug max-w-3xl">
           In Pakistan, nobody tells their boss they're stuck.<br className="hidden sm:block" />
           <span className="text-muted"> TeamPulse hears what they don't say.</span>
@@ -169,4 +169,4 @@ const JiSirPage = () => {
   );
 };
 
-export default JiSirPage;
+export default RiskRadarPage;

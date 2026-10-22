@@ -203,7 +203,7 @@ export const addCheckIn = async (req, res) => {
 
         // A check-in is a meaningful update when something actually moved:
         // the first check-in, progress went up, or a blocker was raised/cleared.
-        // Repeating "90%, almost done" does not reset the clock - that is what the Ji Sir detector watches.
+        // Repeating "90%, almost done" does not reset the clock - that is what Risk Radar watches.
         const meaningful = !prevCheckIn || progress > prevCheckIn.progress || Boolean(blocked) !== prevCheckIn.blocked;
         if (meaningful) task.lastMeaningfulUpdateAt = new Date();
         task.progress = progress;
