@@ -1,30 +1,22 @@
 import React, { useState } from 'react';
-import Navbar from '../components/Navbar'; // Ensure this path matches your project structure
-import Sidebar from '../components/SideBar'; // Update to match your file name (SideBar vs Sidebar)
 import { Outlet } from 'react-router-dom';
-import classNames from 'classnames';
+import Navbar from '../components/Navbar';
+import Sidebar from '../components/SideBar';
 
+// App layout shell: slim sidebar (drawer on mobile) + top bar + page content
 const LandingPage = () => {
-  const [isCollapsed, setIsCollapsed] = useState(true);
-
-  const toggleSidebar = () => {
-    setIsCollapsed(!isCollapsed);
-  };
-
-  // Dynamic padding for the content area based on sidebar state
-  const contentPadding = classNames('p-4 sm:p-6', {
-    'pl-[88px] sm:pl-24': isCollapsed,    // Collapsed sidebar (80px + buffer)
-    'pl-[264px] sm:pl-72': !isCollapsed,  // Expanded sidebar (256px + buffer)
-  });
+  const [drawerOpen, setDrawerOpen] = useState(false);
 
   return (
-    <>
-      <Navbar />
-      <Sidebar isCollapsed={isCollapsed} toggleSidebar={toggleSidebar} />
-      <main className={contentPadding}>
-        <Outlet />  {/* This will render DashboardPage, Inventory, etc. */}
-      </main>
-    </>
+    <div className="min-h-screen bg-canvas">
+      <Sidebar open={drawerOpen} onClose={() => setDrawerOpen(false)} />
+      <div className="lg:pl-60">
+        <Navbar onMenu={() => setDrawerOpen(true)} />
+        <main className="px-4 sm:px-6 lg:px-8 py-6 max-w-6xl mx-auto">
+          <Outlet />
+        </main>
+      </div>
+    </div>
   );
 };
 

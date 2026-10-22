@@ -2,6 +2,7 @@ import React, { useEffect } from 'react'
 import { useState, useRef } from 'react';
 import { motion } from 'framer-motion'; 
 import { useNavigate } from 'react-router-dom';
+import { Logo } from '../components/ui';
 import { useAuthStore } from '../store/authStore';
 import toast from 'react-hot-toast';
 
@@ -63,17 +64,18 @@ const EmailVerificationPage = () => {
     }, [code]);  
 
     return (
-        <div className='max-w-md w-full bg-[#0e0b21] backdrop-filter backdrop-blur-xl rounded-2xl shadow-xl overflow-hidden border border-[#282354]'>
+        <div className='max-w-md w-full card overflow-hidden'>
             <motion.div 
                 initial={{ opacity: 0, y: -50 }}
                 animate={{ opacity: 1, y: 0 }}
                 transition={{ duration: 0.5 }}
-                className='bg-[#0e0b21] backdrop-filter backdrop-blur-xl rounded-2xl p-8 w-full max-w-md'
+                className='card p-8 w-full max-w-md'
             >
-                <h2 className='text-3xl font-bold mb-6 text-center bg-gradient-to-r from-[#7d98d1] to-[#282354] text-transparent bg-clip-text'>
+                <Logo className='justify-center mb-6' />
+            <h2 className='text-xl font-semibold mb-1 text-center text-ink'>
                     Verify Your Email
                 </h2>
-                <p className='text-center text-gray-300 mb-6'>
+                <p className='text-center text-muted mb-6'>
                     Enter the 6-digit verification code sent to your email address
                 </p>
                 <form onSubmit={handleSubmit} className='space-y-6'>
@@ -87,17 +89,17 @@ const EmailVerificationPage = () => {
                                 value={digit}
                                 onChange={(e) => handleChange(index, e.target.value)}
                                 onKeyDown={(e) => handleKeyDown(index, e)}
-                                className='w-12 h-12 text-center text-2xl font-bold bg-[#172542] rounded-lg border-2 border-[#282354] focus:border-[#7d98d1] text-white focus:outline-none'
+                                className='w-11 h-12 text-center text-xl font-semibold bg-white rounded-lg border border-line focus:border-accent focus:ring-2 focus:ring-accent/15 text-ink outline-none'
                             />
                         ))}
                     </div>
-                    {error && <p className='text-red-500 font-semibold mt-2'>{error}</p>}
+                    {error && <p className='text-red-600 font-semibold mt-2'>{error}</p>}
                     <motion.button
                         whileHover={{ scale: 1.05 }}
                         whileTap={{ scale: 0.95 }}
                         type='submit'
                         disabled={isLoading || code.some((digit) => !digit)}
-                        className='w-full py-3 px-4 bg-gradient-to-r from-[#7d98d1] to-[#282354] text-white font-bold rounded-lg shadow-lg hover:from-[#7d98d1]/90 hover:to-[#282354]/90 focus:outline-none focus:ring-2 focus:ring-[#7d98d1] focus:ring-opacity-50 disabled:opacity-50'
+                        className='btn-primary w-full py-2.5 mt-2'
                     >
                         {isLoading ? 'Verifying...' : 'Verify Email'}
                     </motion.button>

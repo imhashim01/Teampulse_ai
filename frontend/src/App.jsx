@@ -1,5 +1,5 @@
-import React, { useEffect, useState } from "react";
-import { Navigate, Route, Routes } from "react-router-dom";
+import React, { useEffect } from "react";
+import { Navigate, Route, Routes, Link } from "react-router-dom";
 import SignUpPage from "./pages/SignUpPage";
 import LoginPage from "./pages/LoginPage";
 import EmailVerificationPage from "./pages/EmailVerificationPage";
@@ -10,15 +10,15 @@ import LoadingSpinner from "./components/LoadingSpinner";
 import ForgotPasswordPage from "./pages/ForgotPasswordPage";
 import ResetPasswordPage from "./pages/ResetPasswordPage";
 import HomePage from "./pages/HomePage";
-import FloatingShapes from "./components/FloatingShapes";
 import ProfilePage from "./pages/ProfilePage";
-import Inventory from "./pages/Inventory";
-import SalesReport from "./pages/SalesReport";
-import FinancePage from "./pages/FinancePage";
 import Settings from "./pages/Settings";
 import LandingPage from "./pages/LandingPage";
 import NotificationPage from "./pages/NotificationPage";
-import MessagePage from "./pages/MessagePage";
+import ProjectsPage from "./pages/ProjectsPage";
+import ProjectDetailPage from "./pages/ProjectDetailPage";
+import TaskDetailPage from "./pages/TaskDetailPage";
+import MyTasksPage from "./pages/MyTasksPage";
+import JiSirPage from "./pages/JiSirPage";
 
 // Protected Route Wrapper
 const ProtectedRoute = ({ children }) => {
@@ -36,6 +36,23 @@ const RedirectAuthenticatedUser = ({ children }) => {
   return children;
 };
 
+// Centered layout for the auth pages
+const AuthLayout = ({ children }) => (
+  <div className="min-h-screen bg-canvas flex items-center justify-center px-4 py-10">{children}</div>
+);
+
+const protectedPages = [
+  ["dashboard", <DashboardPage key="d" />],
+  ["projects", <ProjectsPage key="p" />],
+  ["projects/:projectId", <ProjectDetailPage key="pd" />],
+  ["tasks/:taskId", <TaskDetailPage key="td" />],
+  ["my-tasks", <MyTasksPage key="mt" />],
+  ["ji-sir", <JiSirPage key="js" />],
+  ["notifications", <NotificationPage key="n" />],
+  ["profile", <ProfilePage key="pr" />],
+  ["settings", <Settings key="s" />],
+];
+
 function App() {
   const { isCheckingAuth, checkAuth } = useAuthStore();
 
@@ -46,154 +63,36 @@ function App() {
   if (isCheckingAuth) return <LoadingSpinner />;
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-[#0e0b21] via-[#172542] to-[#282354] flex items-center justify-center relative overflow-hidden">
-      <FloatingShapes
-        color="bg-[#7d98d1]"
-        size="w-64 h-64"
-        top="-5%"
-        left="10%"
-        delay={0}
-      />
-      <FloatingShapes
-        color="bg-[#7d98d1]"
-        size="w-48 h-48"
-        top="70%"
-        left="80%"
-        delay={5}
-      />
-      <FloatingShapes
-        color="bg-[#7d98d1]"
-        size="w-32 h-32"
-        top="40%"
-        left="-10%"
-        delay={2}
-      />
-
+    <div className="min-h-screen bg-canvas text-ink">
       <Routes>
         {/* Public Routes */}
-        <Route
-          path="/"
-          element={
-            <RedirectAuthenticatedUser>
-              <HomePage />
-            </RedirectAuthenticatedUser>
-          }
-        />
-        <Route
-          path="/signup"
-          element={
-            <RedirectAuthenticatedUser>
-              <SignUpPage />
-            </RedirectAuthenticatedUser>
-          }
-        />
-        <Route
-          path="/login"
-          element={
-            <RedirectAuthenticatedUser>
-              <LoginPage />
-            </RedirectAuthenticatedUser>
-          }
-        />
-        <Route path="/verify-email" element={<EmailVerificationPage />} />
-        <Route
-          path="/forgot-password"
-          element={
-            <RedirectAuthenticatedUser>
-              <ForgotPasswordPage />
-            </RedirectAuthenticatedUser>
-          }
-        />
-        <Route
-          path="/reset-password/:token"
-          element={
-            <RedirectAuthenticatedUser>
-              <ResetPasswordPage />
-            </RedirectAuthenticatedUser>
-          }
-        />
+        <Route path="/" element={<RedirectAuthenticatedUser><HomePage /></RedirectAuthenticatedUser>} />
+        <Route path="/signup" element={<RedirectAuthenticatedUser><AuthLayout><SignUpPage /></AuthLayout></RedirectAuthenticatedUser>} />
+        <Route path="/login" element={<RedirectAuthenticatedUser><AuthLayout><LoginPage /></AuthLayout></RedirectAuthenticatedUser>} />
+        <Route path="/verify-email" element={<AuthLayout><EmailVerificationPage /></AuthLayout>} />
+        <Route path="/forgot-password" element={<RedirectAuthenticatedUser><AuthLayout><ForgotPasswordPage /></AuthLayout></RedirectAuthenticatedUser>} />
+        <Route path="/reset-password/:token" element={<RedirectAuthenticatedUser><AuthLayout><ResetPasswordPage /></AuthLayout></RedirectAuthenticatedUser>} />
 
         {/* Protected Routes with Layout */}
-        <Route
-          path="/"
-          element={
-            <ProtectedRoute>
-              <LandingPage />
-            </ProtectedRoute>
-          }
-        >
-          <Route
-            path="dashboard"
-            element={
-              <ProtectedRoute>
-                <DashboardPage />
-              </ProtectedRoute>
-            }
-          />
-          <Route
-            path="inventory"
-            element={
-              <ProtectedRoute>
-                <Inventory />
-              </ProtectedRoute>
-            }
-          />
-          <Route
-            path="profile"
-            element={
-              <ProtectedRoute>
-                <ProfilePage />
-              </ProtectedRoute>
-            }
-          />
-          <Route
-            path="sales"
-            element={
-              <ProtectedRoute>
-                <SalesReport />
-              </ProtectedRoute>
-            }
-          />
-          <Route
-            path="finance"
-            element={
-              <ProtectedRoute>
-                <FinancePage />
-              </ProtectedRoute>
-            }
-          />
-          <Route
-            path="settings"
-            element={
-              <ProtectedRoute>
-                <Settings />
-              </ProtectedRoute>
-            }
-          />
-          <Route
-            path="notification"
-            element={
-              <ProtectedRoute>
-               <NotificationPage/>
-              </ProtectedRoute>
-            }
-          />
-          <Route
-            path="messages"
-            element={
-              <ProtectedRoute>
-                <MessagePage/>
-              </ProtectedRoute>
-            }
-          />
+        <Route path="/" element={<ProtectedRoute><LandingPage /></ProtectedRoute>}>
+          {protectedPages.map(([path, element]) => (
+            <Route key={path} path={path} element={<ProtectedRoute>{element}</ProtectedRoute>} />
+          ))}
+          <Route path="notification" element={<Navigate to="/notifications" replace />} />
         </Route>
 
         {/* Catch-all Route */}
-        <Route path="*" element={<div>404 - Page Not Found</div>} />
+        <Route path="*" element={
+          <AuthLayout>
+            <div className="card p-8 text-center">
+              <p className="text-lg font-semibold">Page not found</p>
+              <Link to="/" className="btn-primary mt-4">Go home</Link>
+            </div>
+          </AuthLayout>
+        } />
       </Routes>
-      <Toaster />
+      <Toaster position="top-right" toastOptions={{ style: { fontSize: 14, borderRadius: 12, border: "1px solid #ECEAE4" } }} />
     </div>
-
   );
 }
 

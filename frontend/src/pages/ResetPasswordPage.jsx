@@ -1,5 +1,6 @@
 import { useState } from "react";
 import { motion } from "framer-motion";
+import { Logo } from '../components/ui';
 import { useAuthStore } from "../store/authStore";
 import { useNavigate, useParams } from "react-router-dom";
 import Input from "../components/Input";
@@ -39,14 +40,15 @@ const ResetPasswordPage = () => {
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.5 }}
-            className='max-w-md w-full bg-[#0e0b21] backdrop-filter backdrop-blur-xl rounded-2xl shadow-xl overflow-hidden border border-[#282354]'
+            className='max-w-md w-full card overflow-hidden'
         >
             <div className='p-8'>
-                <h2 className='text-3xl font-bold mb-6 text-center bg-gradient-to-r from-[#7d98d1] to-[#282354] text-transparent bg-clip-text'>
+        <Logo className='justify-center mb-6' />
+                <h2 className='text-xl font-semibold mb-1 text-center text-ink'>
                     Reset Password
                 </h2>
-                {error && <p className='text-red-500 text-sm mb-4'>{error}</p>}
-                {message && <p className='text-[#7d98d1] text-sm mb-4'>{message}</p>}
+                {error && <p className='text-red-600 text-sm mb-4'>{error}</p>}
+                {message && <p className='text-accent text-sm mb-4'>{message}</p>}
 
                 <form onSubmit={handleSubmit}>
                     <Input
@@ -70,7 +72,7 @@ const ResetPasswordPage = () => {
                     <motion.button
                         whileHover={{ scale: 1.02 }}
                         whileTap={{ scale: 0.98 }}
-                        className='w-full py-3 px-4 bg-gradient-to-r from-[#7d98d1] to-[#282354] text-white font-bold rounded-lg shadow-lg hover:from-[#7d98d1]/90 hover:to-[#282354]/90 focus:outline-none focus:ring-2 focus:ring-[#7d98d1] focus:ring-offset-2 focus:ring-offset-[#0e0b21] transition duration-200'
+                        className='btn-primary w-full py-2.5 mt-2'
                         type='submit'
                         disabled={isLoading}
                     >

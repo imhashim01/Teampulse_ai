@@ -15,11 +15,11 @@ const PasswordCriteria = ({password}) => {
             {criteria.map((item) => (
                 <div key={item.label} className='flex items-center text-xs'>
                     {item.met ? (
-                        <Check className='size-4 text-[#7d98d1] mr-2' /> 
+                        <Check className='size-4 text-accent mr-2' /> 
                     ) : (
-                        <X className='size-4 text-[#282354] mr-2' />
+                        <X className='size-4 text-[#A3A3A3] mr-2' />
                     )} 
-                    <span className={item.met ? 'text-[#7d98d1]' : 'text-[#282354]'}>
+                    <span className={item.met ? 'text-accent' : 'text-[#A3A3A3]'}>
                         {item.label}
                     </span>
                 </div>
@@ -49,11 +49,11 @@ const PasswordStrengthMeter = ({ password }) => {
     const strength = getstrength(password);
 
     const getColor = (strength) => {
-        if (strength === 0) return 'text-red-400';      // Light blue
-        if (strength === 1) return 'text-orange-400';   // Light blue with opacity
-        if (strength === 2) return 'text-yellow-400';      // Dark purple-blue
-        if (strength === 3) return 'text-blue-400';      // Navy blue
-        return 'text-green-400' ;                          // Darkest base
+        if (strength === 0) return 'text-red-600';      // Light blue
+        if (strength === 1) return 'text-orange-600';   // Light blue with opacity
+        if (strength === 2) return 'text-amber-600';      // Dark purple-blue
+        if (strength === 3) return 'text-blue-600';      // Navy blue
+        return 'text-emerald-600' ;                          // Darkest base
     };
 
     const getstrengthText = (strength) => {
@@ -73,19 +73,19 @@ const PasswordStrengthMeter = ({ password }) => {
             'bg-orange-500', // Weak
             'bg-yellow-500', // Fair
             'bg-blue-500',   // Good
-            'bg-blue-900'  // Strong
+            'bg-emerald-500'  // Strong
         ];
         
         if (index < strength) {
             return strengthColors[Math.min(strength, 4)];
         }
-        return 'bg-gray-600'; // Inactive bars
+        return 'bg-[#E5E3DD]'; // Inactive bars
     };
 
     return (
         <div className='mt-2'>
         <div className='flex justify-between items-center mb-1 space-x-1'>
-            <span className='text-xs text-[#7d98d1]'>Password Strength:</span>
+            <span className='text-xs text-accent'>Password Strength:</span>
             <span className={`text-xs ${getColor(strength)}`}>
                 {getstrengthText(strength)}
             </span>

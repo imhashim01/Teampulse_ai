@@ -10,7 +10,10 @@ const userSchema = new mongoose.Schema({
     resetPasswordExpiresAt: Date,
     verificationToken: String,
     verificationTokenExpiresAt: Date,
-    profilePicture: { type: String, default: "https://res.cloudinary.com/df5q2q5/image/upload/v1710761735/default-profile-picture.png" } // Default Cloudinary URL
+    profilePicture: { type: String, default: "https://res.cloudinary.com/df5q2q5/image/upload/v1710761735/default-profile-picture.png" }, // Default Cloudinary URL
+    phone: { type: String, trim: true }, // E.164, e.g. +923001234567
+    whatsappOptIn: { type: Boolean, default: false },
+    isDemo: { type: Boolean, default: false }
 }, { timestamps: true });
 
 export const User = mongoose.model('User', userSchema);

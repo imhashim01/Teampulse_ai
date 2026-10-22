@@ -3,6 +3,7 @@ import { motion } from 'framer-motion'
 import { Loader, Lock, Mail } from 'lucide-react';
 import { Link } from 'react-router-dom';
 import Input from '../components/Input';
+import { Logo } from '../components/ui';
 import { useAuthStore } from '../store/authStore';
 
 const LoginPage = () => {
@@ -20,13 +21,15 @@ const LoginPage = () => {
       initial={{ opacity: 0, y: 20 }}
       animate={{ opacity: 1, y: 0 }}
       transition={{ duration: 0.5 }}
-      className='max-w-md w-full bg-[#0e0b21] backdrop-filter backdrop-blur-xl rounded-2xl shadow-xl overflow-hidden border border-[#282354]'
+      className='max-w-md w-full card overflow-hidden'
     >
       <div className='p-8'>
-        <h2 className='text-3xl font-bold mb-6 text-center bg-gradient-to-r from-[#7d98d1] to-[#282354] text-transparent bg-clip-text'>
+        <Logo className='justify-center mb-6' />
+        <h2 className='text-xl font-semibold mb-1 text-center text-ink'>
           Welcome Back
         </h2>
 
+        <p className='text-sm text-muted text-center mb-6'>Log in to see how your team is really doing.</p>
         <form onSubmit={handleLogin}>
           <Input
             icon={Mail}
@@ -46,34 +49,37 @@ const LoginPage = () => {
           <div className='flex items-center mb-6'>
             <Link 
               to='/forgot-password' 
-              className='text-sm text-[#7d98d1] hover:underline'
+              className='text-sm text-accent hover:underline'
             >
               Forgot Password?
             </Link>
           </div>
-          {error && <p className='text-red-500 font-semibold mb-2'>{error}</p>}
+          <button type='button' className='w-full text-xs text-muted hover:text-accent mb-3' onClick={() => { setEmail('lead@teampulse.demo'); setPassword('Demo@1234'); }}>
+            Fill demo lead account (Usman)
+          </button>
+          {error && <p className='text-red-600 font-semibold mb-2'>{error}</p>}
 
           <motion.button
-            className='mt-5 w-full py-3 px-4 bg-gradient-to-r from-[#7d98d1] to-[#282354] text-white font-bold rounded-lg shadow-lg hover:from-[#7d98d1]/90 hover:to-[#282354]/90 focus:outline-none focus:ring-2 focus:ring-[#7d98d1] focus:ring-offset-2 focus:ring-offset-[#0e0b21] transition duration-200'
+            className='btn-primary w-full py-2.5 mt-2'
             whileHover={{ scale: 1.02 }}
             whileTap={{ scale: 0.98 }}
             type='submit'
             disabled={isLoading}
           >
             {isLoading ? 
-              <Loader size='1.5rem' className='animate-spin mx-auto text-white' /> 
+              <Loader size='1.5rem' className='animate-spin mx-auto' /> 
               : 'Login'
             }
           </motion.button>
         </form>
       </div>
 
-      <div className='px-8 py-4 bg-[#172542] flex justify-center'>
-        <p className='text-sm text-gray-300'>
+      <div className='px-8 py-4 bg-canvas border-t border-line flex justify-center'>
+        <p className='text-sm text-muted'>
           Don't have an account?{" "}
           <Link 
             to='/signup' 
-            className='text-[#7d98d1] ml-1 hover:underline'
+            className='text-accent ml-1 hover:underline'
           >
             Sign Up
           </Link>

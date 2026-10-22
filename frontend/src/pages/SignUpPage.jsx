@@ -4,6 +4,7 @@ import Input from '../components/Input';
 import { Loader, Lock, Mail, User } from 'lucide-react';
 import { Link, useNavigate } from 'react-router-dom';
 import PasswordStrengthMeter from '../components/PasswordStrengthMeter';
+import { Logo } from '../components/ui';
 import { useAuthStore } from '../store/authStore';
 
 const SignUpPage = () => {
@@ -29,13 +30,15 @@ const SignUpPage = () => {
       initial={{ opacity: 0, y: 20 }}
       animate={{ opacity: 1, y: 0 }}
       transition={{ duration: 0.5 }}
-      className='max-w-md w-full bg-[#0e0b21] rounded-2xl shadow-xl overflow-hidden border border-[#282354]'>
+      className='max-w-md w-full card overflow-hidden'>
 
       <div className='p-8'>
-        <h2 className='text-3xl font-bold mb-6 text-center bg-gradient-to-r from-[#7d98d1] to-[#282354] text-transparent bg-clip-text'>
+        <Logo className='justify-center mb-6' />
+        <h2 className='text-xl font-semibold mb-1 text-center text-ink'>
           Create Account
         </h2>
 
+        <p className='text-sm text-muted text-center mb-6'>Start leading with clarity, not guesswork.</p>
         <form onSubmit={handleSignup}>
           <Input
             icon={User}
@@ -58,11 +61,11 @@ const SignUpPage = () => {
             value={password}
             onChange={(e) => setPassword(e.target.value)}
           />
-          {error && <p className='text-red-500 font-semibold mt-2'>{error}</p>}
+          {error && <p className='text-red-600 font-semibold mt-2'>{error}</p>}
           <PasswordStrengthMeter password={password} />
 
           <motion.button
-            className='mt-5 w-full py-3 px-4 bg-gradient-to-r from-[#7d98d1] to-[#282354] text-white font-bold rounded-lg shadow-lg hover:from-[#7d98d1]/90 hover:to-[#282354]/90 focus:outline-none focus:ring-2 focus:ring-[#7d98d1] focus:ring-offset-2 focus:ring-offset-[#0e0b21] transition duration-200'
+            className='btn-primary w-full py-2.5 mt-2'
             whileHover={{ scale: 1.02 }}
             whileTap={{ scale: 0.98 }}
             type='submit'
@@ -73,10 +76,10 @@ const SignUpPage = () => {
         </form>
       </div>
 
-      <div className='px-8 py-4 bg-[#172542] flex justify-center'>
-        <p className='text-sm text-gray-300'>
+      <div className='px-8 py-4 bg-canvas border-t border-line flex justify-center'>
+        <p className='text-sm text-muted'>
           Already have an account?{" "}
-          <Link to={'/login'} className='text-[#7d98d1] hover:underline font-medium'>
+          <Link to={'/login'} className='text-accent hover:underline font-medium'>
               Login
           </Link>
         </p>

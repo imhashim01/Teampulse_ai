@@ -1,123 +1,137 @@
-import React from 'react';
-import { motion } from 'framer-motion';
+import { useEffect, useState } from "react";
+import { Link } from "react-router-dom";
+import { motion } from "framer-motion";
+import { FolderKanban, CheckCircle2, Loader, AlarmClock, Inbox, Ban, Radar, ListChecks, CalendarClock, RotateCcw, Bell, Activity } from "lucide-react";
+import toast from "react-hot-toast";
+import { api, errMsg } from "../lib/api";
+import { useAuthStore } from "../store/authStore";
+import { PageHeader, StatCard, SkeletonCards, Skeleton, StatusPill, DeadlineChip, AvatarStack, Avatar, LevelBadge, EmptyState, timeAgo, fadeIn } from "../components/ui";
+
+const Section = ({ title, icon: Icon, action, children }) => (
+  <div className="card">
+    <div className="flex items-center justify-between px-5 py-3.5 border-b border-line">
+      <div className="flex items-center gap-2 text-sm font-medium text-ink">{Icon && <Icon size={16} className="text-muted" />}{title}</div>
+      {action}
+    </div>
+    <div className="p-2">{children}</div>
+  </div>
+);
+
+const Empty = ({ text }) => <p className="text-sm text-muted px-3 py-6 text-center">{text}</p>;
+
+const TaskRow = ({ task, showAssignees }) => (
+  <Link to={`/tasks/${task._id}`} className="flex items-center gap-3 rounded-lg px-3 py-2.5 hover:bg-canvas">
+    <div className="min-w-0 flex-1">
+      <p className="text-sm font-medium text-ink truncate">{task.title}</p>
+      <p className="text-xs text-muted truncate">{task.project?.name}</p>
+    </div>
+    {showAssignees && <AvatarStack users={task.assignees} max={3} />}
+    <StatusPill status={task.status} />
+    <DeadlineChip deadline={task.deadline} done={task.status === "Completed"} />
+  </Link>
+);
 
 const DashboardPage = () => {
+  const { user } = useAuthStore();
+  const [data, setData] = useState(null);
 
-  const transactions = [
-    { description: 'John Chen', date: 'Mar 14', category: 'Income', amount: '+52,350.00' },
-    { description: 'Microsoft Coffee', date: 'Mar 12', category: 'Food', amount: '-55.50' },
-  ];
+  useEffect(() => {
+    api.get("/dashboard").then((r) => setData(r.data.data)).catch((e) => toast.error(errMsg(e)));
+  }, []);
+
+  const hour = new Date().getHours();
+  const greeting = hour < 12 ? "Good morning" : hour < 17 ? "Good afternoon" : "Good evening";
+
+  if (!data) {
+    return (
+      <div>
+        <Skeleton className="h-8 w-64 mb-6" />
+        <div className="grid grid-cols-2 lg:grid-cols-4 gap-3 mb-6">{Array.from({ length: 8 }).map((_, i) => <Skeleton key={i} className="h-24" />)}</div>
+        <SkeletonCards count={2} className="h-48" />
+      </div>
+    );
+  }
+
+  const { lead, member, isLead } = data;
 
   return (
-    <motion.div
-      initial={{ opacity: 0, y: 20 }}
-      animate={{ opacity: 1, y: 0 }}
-      className="max-w-7xl mx-auto"
-    >
-      <div className="flex justify-between items-center mb-6 sm:mb-8">
-        <h1 className="text-2xl sm:text-3xl font-bold bg-gradient-to-r from-[#7d98d1] to-[#282354] text-transparent bg-clip-text">
-          Dashboard
-        </h1>
-      </div>
+    <motion.div {...fadeIn}>
+      <PageHeader title={`${greeting}, ${user?.name?.split(" ")[0]}`} subtitle={isLead ? "Here is how your team is really doing today." : "Here is what is on your plate."} />
 
-      <div className="grid grid-cols-1 lg:grid-cols-3 gap-4 sm:gap-6">
-        <motion.div
-          className="p-4 sm:p-6 bg-[#172542] rounded-xl border border-[#282354]"
-          initial={{ scale: 0.95 }}
-          animate={{ scale: 1 }}
-        >
-          <h3 className="text-lg sm:text-xl font-semibold text-[#7d98d1] mb-4">Balance Summary</h3>
-          <p className="text-gray-300 text-sm sm:text-base">From: 5.14 Mar. 2024</p>
-        </motion.div>
+      {!isLead && member.myTasks === 0 && (
+        <EmptyState icon={FolderKanban} title="No projects yet" hint="Create a project to lead a team, or ask your lead to add you by email." action={<Link to="/projects" className="btn-primary">Go to projects</Link>} />
+      )}
 
-        <motion.div
-          className="lg:col-span-2 p-4 sm:p-6 bg-[#172542] rounded-xl border border-[#282354]"
-          initial={{ opacity: 0 }}
-          animate={{ opacity: 1 }}
-        >
-          <h3 className="text-lg sm:text-xl font-semibold text-[#7d98d1] mb-4">Recent Transactions</h3>
-          {/* Table for medium screens and above */}
-          <div className="hidden md:block overflow-x-auto">
-            <table className="w-full">
-              <thead>
-                <tr className="text-left text-[#7d98d1] border-b border-[#282354]">
-                  <th className="pb-3">Description</th>
-                  <th className="pb-3">Date</th>
-                  <th className="pb-3">Category</th>
-                  <th className="pb-3">Amount</th>
-                </tr>
-              </thead>
-              <tbody>
-                {transactions.map((transaction, index) => (
-                  <tr key={index} className="border-b border-[#282354] last:border-0">
-                    <td className="py-3 text-gray-300">{transaction.description}</td>
-                    <td className="py-3 text-gray-300">{transaction.date}</td>
-                    <td className="py-3 text-gray-300">{transaction.category}</td>
-                    <td
-                      className={`py-3 ${
-                        transaction.amount.startsWith('+') ? 'text-green-400' : 'text-red-400'
-                      }`}
-                    >
-                      {transaction.amount}
-                    </td>
-                  </tr>
-                ))}
-              </tbody>
-            </table>
+      {isLead && (
+        <>
+          <div className="grid grid-cols-2 lg:grid-cols-4 gap-3 mb-6">
+            <StatCard label="Active projects" value={lead.activeProjects} icon={FolderKanban} tone="indigo" hint={`${lead.totalProjects} total`} />
+            <StatCard label="Total tasks" value={lead.totalTasks} icon={ListChecks} />
+            <StatCard label="Completed" value={lead.completed} icon={CheckCircle2} tone="green" />
+            <StatCard label="In progress" value={lead.inProgress} icon={Loader} tone="indigo" />
+            <StatCard label="Overdue" value={lead.overdue} icon={AlarmClock} tone="red" />
+            <StatCard label="Waiting for review" value={lead.awaitingReview} icon={Inbox} tone="violet" />
+            <StatCard label="Blocked" value={lead.blocked} icon={Ban} tone="red" />
+            <StatCard label="At risk" value={lead.atRisk} icon={Radar} tone="amber" hint={`${lead.atRiskHigh} high`} />
           </div>
-          {/* Card layout for small screens */}
-          <div className="md:hidden space-y-4">
-            {transactions.map((transaction, index) => (
-              <div key={index} className="p-4 bg-[#282354] rounded-lg">
-                <div className="flex justify-between items-center mb-2">
-                  <span className="text-gray-300 text-sm">{transaction.description}</span>
-                  <span
-                    className={`text-sm ${
-                      transaction.amount.startsWith('+') ? 'text-green-400' : 'text-red-400'
-                    }`}
-                  >
-                    {transaction.amount}
-                  </span>
+
+          <div className="grid lg:grid-cols-2 gap-4 mb-6">
+            <Section title="Ji Sir Detector" icon={Radar} action={<Link to="/ji-sir" className="text-xs text-accent hover:underline">Open</Link>}>
+              {lead.riskItems.length === 0 ? <Empty text="No at-risk tasks right now. Open the detector to run an analysis." /> : lead.riskItems.map((r) => (
+                <Link key={r._id} to="/ji-sir" className="flex items-center gap-3 rounded-lg px-3 py-2.5 hover:bg-canvas">
+                  <Avatar user={r.member} />
+                  <div className="min-w-0 flex-1">
+                    <p className="text-sm font-medium text-ink truncate">{r.task?.title}</p>
+                    <p className="text-xs text-muted truncate">{r.member?.name} · {r.category}</p>
+                  </div>
+                  <LevelBadge level={r.level} />
+                </Link>
+              ))}
+            </Section>
+            <Section title="Submissions waiting for review" icon={Inbox}>
+              {lead.reviewQueue.length === 0 ? <Empty text="Nothing to review." /> : lead.reviewQueue.map((t) => <TaskRow key={t._id} task={t} showAssignees />)}
+            </Section>
+            <Section title="Upcoming deadlines (7 days)" icon={CalendarClock}>
+              {lead.upcomingDeadlines.length === 0 ? <Empty text="No deadlines in the next 7 days." /> : lead.upcomingDeadlines.map((t) => <TaskRow key={t._id} task={t} showAssignees />)}
+            </Section>
+            <Section title="Recent activity" icon={Activity}>
+              {lead.recentActivity.length === 0 ? <Empty text="No activity yet." /> : lead.recentActivity.map((a) => (
+                <div key={a._id} className="flex items-start gap-3 px-3 py-2.5">
+                  <Avatar user={a.actor} size="w-7 h-7 text-[10px]" />
+                  <p className="text-sm text-ink flex-1"><span className="font-medium">{a.actor?.name}</span> {a.message}
+                    <span className="block text-xs text-muted">{a.project?.name} · {timeAgo(a.createdAt)}</span>
+                  </p>
                 </div>
-                <div className="text-xs text-gray-400">
-                  <span>{transaction.date}</span> • <span>{transaction.category}</span>
-                </div>
-              </div>
-            ))}
+              ))}
+            </Section>
           </div>
-        </motion.div>
+        </>
+      )}
 
-        <motion.div
-          className="p-4 sm:p-6 bg-[#172542] rounded-xl border border-[#282354]"
-          initial={{ scale: 0.95 }}
-          animate={{ scale: 1 }}
-        >
-          <h3 className="text-lg sm:text-xl font-semibold text-[#7d98d1] mb-4">Upcoming Payments</h3>
-          <div className="space-y-2">
-            {['$20.00', '$25.00', '$30.00', '$21.00'].map((amount, index) => (
-              <div key={index} className="flex justify-between items-center text-gray-300 text-sm sm:text-base">
-                <span>Payment {index + 1}</span>
-                <span className="text-red-400">{amount}</span>
-              </div>
-            ))}
+      {member.myTasks > 0 && (
+        <>
+          <h2 className="text-sm font-semibold text-ink mb-3">My work</h2>
+          <div className="grid grid-cols-2 lg:grid-cols-4 gap-3 mb-4">
+            <StatCard label="My open tasks" value={member.myTasks} icon={ListChecks} tone="indigo" />
+            <StatCard label="Due in 48h" value={member.dueSoon} icon={CalendarClock} tone="amber" />
+            <StatCard label="Overdue" value={member.overdue} icon={AlarmClock} tone="red" />
+            <StatCard label="Revision requests" value={member.revisionRequests} icon={RotateCcw} tone="violet" />
           </div>
-        </motion.div>
-
-        <motion.div
-          className="p-4 sm:p-6 bg-[#172542] rounded-xl border border-[#282354]"
-          initial={{ scale: 0.95 }}
-          animate={{ scale: 1 }}
-        >
-          <h3 className="text-lg sm:text-xl font-semibold text-[#7d98d1] mb-4">Saving Goal</h3>
-          <div className="h-2 bg-[#282354] rounded-full mb-2">
-            <div
-              className="h-2 bg-[#7d98d1] rounded-full transition-all duration-500"
-              style={{ width: '30%' }}
-            />
+          <div className="grid lg:grid-cols-2 gap-4">
+            <Section title="My tasks" icon={ListChecks} action={<Link to="/my-tasks" className="text-xs text-accent hover:underline">View all</Link>}>
+              {member.tasks.length === 0 ? <Empty text="No open tasks assigned to you." /> : member.tasks.map((t) => <TaskRow key={t._id} task={t} />)}
+            </Section>
+            <Section title="Recent notifications" icon={Bell} action={<Link to="/notifications" className="text-xs text-accent hover:underline">View all</Link>}>
+              {member.recentNotifications.length === 0 ? <Empty text="You're all caught up." /> : member.recentNotifications.map((n) => (
+                <Link key={n._id} to={n.task ? `/tasks/${n.task}` : "/notifications"} className="flex items-start gap-3 rounded-lg px-3 py-2.5 hover:bg-canvas">
+                  <span className={`mt-1.5 w-2 h-2 rounded-full shrink-0 ${n.read ? "bg-transparent" : "bg-accent"}`} />
+                  <p className="text-sm text-ink flex-1">{n.message}<span className="block text-xs text-muted">{timeAgo(n.createdAt)}</span></p>
+                </Link>
+              ))}
+            </Section>
           </div>
-          <p className="text-gray-300 text-sm sm:text-base">$1,000 progress on the board level</p>
-        </motion.div>
-      </div>
+        </>
+      )}
     </motion.div>
   );
 };

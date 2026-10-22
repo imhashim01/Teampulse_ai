@@ -1,144 +1,51 @@
-import React, { useState } from 'react';
-import { motion } from 'framer-motion';
+import { useState } from "react";
+import { motion } from "framer-motion";
+import { MessageCircle, Phone } from "lucide-react";
+import toast from "react-hot-toast";
+import { api, errMsg } from "../lib/api";
+import { useAuthStore } from "../store/authStore";
+import { PageHeader, fadeIn } from "../components/ui";
 
 const Settings = () => {
-  // State for settings
-  const [name, setName] = useState('John Doe');
-  const [email, setEmail] = useState('john.doe@example.com');
-  const [emailNotifications, setEmailNotifications] = useState(true);
-  const [pushNotifications, setPushNotifications] = useState(false);
-  const [theme, setTheme] = useState('dark');
+  const { user } = useAuthStore();
+  const [phone, setPhone] = useState(user?.phone || "");
+  const [optIn, setOptIn] = useState(Boolean(user?.whatsappOptIn));
+  const [saving, setSaving] = useState(false);
 
-  // Function to save changes
-  const handleSaveChanges = () => {
-    alert('Settings saved!');
-    // Add your API call or save logic here
+  const save = async (e) => {
+    e.preventDefault();
+    setSaving(true);
+    try {
+      const r = await api.patch("/user/settings", { phone: phone.trim(), whatsappOptIn: optIn });
+      // Keep the auth store in sync without changing its functions
+      useAuthStore.setState({ user: r.data.user });
+      setPhone(r.data.user.phone || "");
+      toast.success("Settings saved");
+    } catch (err) { toast.error(errMsg(err)); } finally { setSaving(false); }
   };
 
   return (
-<div className=' pt-24'>
-<motion.div
-      initial={{ opacity: 0, y: 20 }}
-      animate={{ opacity: 1, y: 0 }}
-      className="max-w-7xl mx-auto p-4 sm:p-6"
-    >
-      {/* Header */}
-      <div className="mb-6 sm:mb-8">
-        <h1 className="text-2xl sm:text-3xl font-bold bg-gradient-to-r from-[#7d98d1] to-[#282354] text-transparent bg-clip-text">
-          Settings
-        </h1>
-      </div>
-
-      {/* Account Settings */}
-      <motion.div
-        className="p-4 sm:p-6 bg-[#172542] rounded-xl border border-[#282354] mb-6 sm:mb-8"
-        initial={{ opacity: 0 }}
-        animate={{ opacity: 1 }}
-      >
-        <h3 className="text-lg sm:text-xl font-semibold text-[#7d98d1] mb-4">Account Settings</h3>
-        <div className="space-y-4">
-          <div>
-            <label className="block text-gray-300 text-sm sm:text-base mb-2">Name</label>
-            <input
-              type="text"
-              value={name}
-              onChange={(e) => setName(e.target.value)}
-              className="w-full p-2 bg-[#282354] text-white rounded-lg focus:outline-none focus:ring-2 focus:ring-[#7d98d1]"
-            />
+    <motion.div {...fadeIn} className="max-w-xl">
+      <PageHeader title="Settings" subtitle="Choose how TeamPulse reaches you." />
+      <form onSubmit={save} className="card p-6 space-y-5">
+        <div>
+          <label className="label">WhatsApp phone number</label>
+          <div className="relative">
+            <Phone size={15} className="absolute left-3 top-1/2 -translate-y-1/2 text-muted" />
+            <input className="field pl-9" value={phone} onChange={(e) => setPhone(e.target.value)} placeholder="+923001234567 or 03001234567" />
           </div>
-          <div>
-            <label className="block text-gray-300 text-sm sm:text-base mb-2">Email</label>
-            <input
-              type="email"
-              value={email}
-              onChange={(e) => setEmail(e.target.value)}
-              className="w-full p-2 bg-[#282354] text-white rounded-lg focus:outline-none focus:ring-2 focus:ring-[#7d98d1]"
-            />
-          </div>
+          <p className="text-xs text-muted mt-1.5">Saved in international format (E.164).</p>
         </div>
-      </motion.div>
-
-      {/* Notification Preferences */}
-      <motion.div
-        className="p-4 sm:p-6 bg-[#172542] rounded-xl border border-[#282354] mb-6 sm:mb-8"
-        initial={{ opacity: 0 }}
-        animate={{ opacity: 1 }}
-      >
-        <h3 className="text-lg sm:text-xl font-semibold text-[#7d98d1] mb-4">Notification Preferences</h3>
-        <div className="space-y-4">
-          <div className="flex items-center justify-between">
-            <span className="text-gray-300 text-sm sm:text-base">Email Notifications</span>
-            <label className="relative inline-flex items-center cursor-pointer">
-              <input
-                type="checkbox"
-                checked={emailNotifications}
-                onChange={() => setEmailNotifications(!emailNotifications)}
-                className="sr-only peer"
-              />
-              <div className="w-11 h-6 bg-gray-200 peer-focus:outline-none peer-focus:ring-2 peer-focus:ring-[#7d98d1] rounded-full peer dark:bg-gray-700 peer-checked:bg-[#7d98d1]"></div>
-              <div className="absolute left-1 top-1 w-4 h-4 bg-white rounded-full transition-transform peer-checked:translate-x-5"></div>
-            </label>
-          </div>
-          <div className="flex items-center justify-between">
-            <span className="text-gray-300 text-sm sm:text-base">Push Notifications</span>
-            <label className="relative inline-flex items-center cursor-pointer">
-              <input
-                type="checkbox"
-                checked={pushNotifications}
-                onChange={() => setPushNotifications(!pushNotifications)}
-                className="sr-only peer"
-              />
-              <div className="w-11 h-6 bg-gray-200 peer-focus:outline-none peer-focus:ring-2 peer-focus:ring-[#7d98d1] rounded-full peer dark:bg-gray-700 peer-checked:bg-[#7d98d1]"></div>
-              <div className="absolute left-1 top-1 w-4 h-4 bg-white rounded-full transition-transform peer-checked:translate-x-5"></div>
-            </label>
-          </div>
-        </div>
-      </motion.div>
-
-      {/* Theme Customization */}
-      <motion.div
-        className="p-4 sm:p-6 bg-[#172542] rounded-xl border border-[#282354] mb-6 sm:mb-8"
-        initial={{ opacity: 0 }}
-        animate={{ opacity: 1 }}
-      >
-        <h3 className="text-lg sm:text-xl font-semibold text-[#7d98d1] mb-4">Theme Customization</h3>
-        <div className="space-y-4">
-          <div className="flex items-center space-x-4">
-            <label className="flex items-center space-x-2">
-              <input
-                type="radio"
-                value="dark"
-                checked={theme === 'dark'}
-                onChange={() => setTheme('dark')}
-                className="form-radio text-[#7d98d1]"
-              />
-              <span className="text-gray-300 text-sm sm:text-base">Dark Theme</span>
-            </label>
-            <label className="flex items-center space-x-2">
-              <input
-                type="radio"
-                value="light"
-                checked={theme === 'light'}
-                onChange={() => setTheme('light')}
-                className="form-radio text-[#7d98d1]"
-              />
-              <span className="text-gray-300 text-sm sm:text-base">Light Theme</span>
-            </label>
-          </div>
-        </div>
-      </motion.div>
-
-      {/* Save Changes Button */}
-      <div className="flex justify-end">
-        <button
-          onClick={handleSaveChanges}
-          className="px-4 py-2 bg-gradient-to-r from-[#7d98d1] to-[#282354] text-white font-bold rounded-lg hover:from-[#282354] hover:to-[#7d98d1]"
-        >
-          Save Changes
-        </button>
-      </div>
+        <label className="flex items-start gap-3 rounded-lg border border-line p-4 cursor-pointer">
+          <input type="checkbox" checked={optIn} onChange={(e) => setOptIn(e.target.checked)} className="mt-0.5 accent-[#4F46E5]" />
+          <span>
+            <span className="text-sm font-medium text-ink flex items-center gap-2"><MessageCircle size={15} className="text-[#128C7E]" />Send me WhatsApp notifications</span>
+            <span className="block text-xs text-muted mt-1">Task assignments, revision requests, deadline reminders and messages your lead approves. You can turn this off any time.</span>
+          </span>
+        </label>
+        <div className="flex justify-end"><button className="btn-primary" disabled={saving}>{saving ? "Saving…" : "Save settings"}</button></div>
+      </form>
     </motion.div>
-</div>
   );
 };
 
