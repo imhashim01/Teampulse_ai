@@ -17,7 +17,7 @@ cd ../frontend && npm install && cp .env.example .env
 | `MONGO_URI`, `JWT_SECRET` | backend | required |
 | `CLIENT_URL` | backend | comma-separated allowed origins. `http://localhost:5173` is always allowed when `NODE_ENV` is not `production` |
 | `GEMINI_API_KEY`, `AI_MODEL` | backend | optional. Without a key the detector runs in **Rule-based** mode |
-| `WHATSAPP_TOKEN`, `WHATSAPP_PHONE_NUMBER_ID`, `WHATSAPP_TEMPLATE_NAME` | backend | optional. Without them WhatsApp runs in **mock mode** (deliveries saved as `Simulated`) |
+| `WHATSAPP_*`, `APP_BASE_URL` | backend | optional. See WHATSAPP_SETUP.md. With `WHATSAPP_ENABLED=false` WhatsApp runs in dry-run mode |
 | `CRON_SECRET` | backend | protects `POST /api/jobs/reminders` |
 | `VITE_BACKEND_URL` | frontend | e.g. `http://localhost:5000` |
 
@@ -30,7 +30,7 @@ cd frontend && npm run dev     # app on :5173
 ```
 
 Demo logins (password `Demo@1234`): `lead@teampulse.demo` (Usman, lead), `ali@`, `sara@`, `bilal@teampulse.demo`.
-Optional: set `DEMO_WHATSAPP_NUMBER=+92...` (your own verified number) before seeding to give demo users a WhatsApp number.
+Optional: set `DEMO_WHATSAPP_NUMBER=+92...` (a number you control) before seeding; demo users get it as an already-verified WhatsApp number.
 
 ## Gemini key
 
@@ -40,15 +40,9 @@ Optional: set `DEMO_WHATSAPP_NUMBER=+92...` (your own verified number) before se
 
 The AI only receives computed signals and check-in text, and must pick its evidence from a fixed list of fact IDs, so it cannot invent facts. Any timeout (15 s), error or invalid JSON falls back to the rule engine. Results are cached per task by an input hash, so the AI is only called again when the task's inputs change or the lead clicks Re-analyze. To use Groq/OpenAI instead, set `AI_PROVIDER=groq|openai`, `AI_API_KEY`, `AI_MODEL`.
 
-## WhatsApp Cloud API (test number)
+## WhatsApp notifications
 
-1. Create an app at https://developers.facebook.com, then add the **WhatsApp** product.
-2. In WhatsApp > API Setup, copy the **temporary access token** and the **Phone number ID** into `WHATSAPP_TOKEN` and `WHATSAPP_PHONE_NUMBER_ID`.
-3. Add your own phone under "To" and verify it. The test number can only message verified numbers.
-4. Users must add their phone in **Settings** and tick the WhatsApp opt-in.
-5. **Important:** outside the 24-hour customer-service window, Meta only delivers **approved templates**. For a reliable demo set `WHATSAPP_TEMPLATE_NAME=hello_world`. Every message then sends the `hello_world` template (the real text is still stored in the log). Leave it empty to send plain text, which only arrives if the recipient messaged your number in the last 24 h.
-
-Every delivery is stored in `NotificationDelivery` (Pending / Sent / Failed / Simulated) with a unique `dedupeKey`, and is retried up to 2 times on 5xx. Leads can see the **Notification log** at the bottom of the Notifications page.
+Number verification (OTP), project-added, task-submitted, deadline and overdue messages use the official Meta WhatsApp Cloud API. **See [WHATSAPP_SETUP.md](WHATSAPP_SETUP.md)** for Meta configuration, templates, webhook, scheduling and troubleshooting. Without credentials the app runs in dry-run mode (deliveries logged as `Simulated`).
 
 ## Deadline reminders
 

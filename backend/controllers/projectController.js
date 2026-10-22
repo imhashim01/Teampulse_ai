@@ -3,7 +3,10 @@ import { Task, TASK_PRIORITIES } from "../models/TaskModel.js";
 import { User } from "../models/UserModel.js";
 import { ActivityEvent } from "../models/ActivityEventModel.js";
 import { NotificationDelivery } from "../models/NotificationDeliveryModel.js";
-import { logActivity, notify } from "../services/notificationService.js";
+import { logActivity, notify, deliverySummary } from "../services/notificationService.js";
+import { notifyMemberAdded } from "../services/notificationEvents.js";
+import { whatsappConfig } from "../config/whatsapp.js";
+import { formatDeadline } from "../services/whatsappMessages.js";
 import { runReminders } from "../services/reminderService.js";
 
 const USER_FIELDS = "name email profilePicture";
@@ -82,8 +85,9 @@ export const addMember = async (req, res) => {
         req.project.members.push(user._id);
         await req.project.save();
         await logActivity({ project: req.project._id, actor: req.userId, type: "member_added", message: `added ${user.name} to the team` });
-        await notify({ userId: user._id, project: req.project._id, type: "member_added", message: `You were added to the project "${req.project.name}"` });
-        res.status(200).json({ success: true, message: `${user.name} added`, data: { _id: user._id, name: user.name, email: user.email } });
+        // Membership is saved; a notification problem must not undo it
+        const result = await notifyMemberAdded({ project: req.project, member: user, addedById: req.userId });
+        res.status(200).json({ success: true, message: `${user.name} added`, data: { _id: user._id, name: user.name, email: user.email, whatsapp: deliverySummary(result.whatsapp) } });
     } catch (error) {
         res.status(500).json({ success: false, message: error.message });
     }
@@ -131,11 +135,13 @@ export const createTask = async (req, res) => {
         });
         await logActivity({ project: req.project._id, task: task._id, actor: req.userId, type: "task_created", message: `created task "${task.title}"` });
 
-        for (const userId of uniqueAssignees) {
+        const deadlineText = formatDeadline(task.deadline, whatsappConfig().reminders.timezone);
+        const assigneeUsers = await User.find({ _id: { $in: uniqueAssignees } }).select("name");
+        for (const member of assigneeUsers) {
             await notify({
-                userId, project: req.project._id, task: task._id, type: "assigned",
-                message: `New task assigned: "${task.title}" (due ${new Date(task.deadline).toLocaleString("en-GB", { dateStyle: "medium", timeStyle: "short" })})`,
-                whatsapp: { dedupeKey: `assigned:${task._id}:${userId}` },
+                userId: member._id, project: req.project._id, task: task._id, type: "assigned",
+                message: `New task assigned: "${task.title}" (due ${deadlineText})`,
+                whatsapp: { type: "task_assigned", key: `task_assigned:${task._id}:${member._id}`, vars: { memberName: member.name, taskTitle: task.title, projectName: req.project.name, deadlineText } },
             });
         }
         res.status(201).json({ success: true, message: "Task created", data: task });

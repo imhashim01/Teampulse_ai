@@ -3,7 +3,7 @@ import { Notification } from "../models/NotificationModel.js";
 import { NotificationDelivery } from "../models/NotificationDeliveryModel.js";
 import { leadProjectIds, runReminders } from "../services/reminderService.js";
 import { assessForLead } from "../services/riskService.js";
-import { isWhatsAppConfigured } from "../services/whatsappService.js";
+import { whatsappConfig, whatsappMode, missingSendConfig } from "../config/whatsapp.js";
 import { isAIConfigured } from "../services/aiService.js";
 
 export const listNotifications = async (req, res) => {
@@ -53,7 +53,7 @@ export const listMyDeliveries = async (req, res) => {
         const deliveries = await NotificationDelivery.find({ project: { $in: projectIds } })
             .populate("recipient", "name email").populate("task", "title").populate("project", "name")
             .sort({ createdAt: -1 }).limit(100);
-        res.status(200).json({ success: true, data: { deliveries, whatsappMode: isWhatsAppConfigured() ? (process.env.WHATSAPP_TEMPLATE_NAME ? "template" : "text") : "mock" } });
+        res.status(200).json({ success: true, data: { deliveries, whatsappMode: whatsappMode(), whatsappConfigMissing: whatsappConfig().enabled ? missingSendConfig() : [] } });
     } catch (error) {
         res.status(500).json({ success: false, message: error.message });
     }

@@ -5,13 +5,19 @@ import { Bell, CheckCheck, MessageCircle, AlarmClock } from "lucide-react";
 import toast from "react-hot-toast";
 import classNames from "classnames";
 import { api, errMsg } from "../lib/api";
+import { WA_REASONS } from "../lib/whatsapp";
 import { PageHeader, EmptyState, SkeletonCards, Pill, timeAgo, fmtDate, fadeIn } from "../components/ui";
 
 const DELIVERY_STYLES = {
-  Sent: "bg-emerald-50 text-emerald-700",
-  Simulated: "bg-sky-50 text-sky-700",
-  Failed: "bg-red-50 text-red-700",
+  Queued: "bg-slate-100 text-slate-600",
   Pending: "bg-slate-100 text-slate-600",
+  Accepted: "bg-indigo-50 text-indigo-700",
+  Sent: "bg-emerald-50 text-emerald-700",
+  Delivered: "bg-emerald-50 text-emerald-700",
+  Read: "bg-emerald-100 text-emerald-800",
+  Simulated: "bg-sky-50 text-sky-700",
+  Skipped: "bg-amber-50 text-amber-800",
+  Failed: "bg-red-50 text-red-700",
 };
 
 const NotificationPage = () => {
@@ -69,7 +75,7 @@ const NotificationPage = () => {
             <div>
               <h2 className="text-lg font-semibold text-ink flex items-center gap-2"><MessageCircle size={18} className="text-[#128C7E]" />Notification log</h2>
               <p className="text-sm text-muted">Every WhatsApp delivery for projects you lead.
-                {log && <> Mode: <span className="font-medium text-ink">{log.whatsappMode === "mock" ? "Mock (no credentials, nothing is really sent)" : log.whatsappMode === "template" ? "Live, template messages" : "Live, text messages"}</span></>}
+                {log && <> Mode: <span className="font-medium text-ink">{log.whatsappMode === "live" ? (log.whatsappConfigMissing?.length ? `Live, but missing ${log.whatsappConfigMissing.join(", ")}` : "Live (Meta WhatsApp Cloud API)") : "Dry run (WhatsApp disabled, nothing is sent)"}</span></>}
               </p>
             </div>
             <button className="btn-primary" onClick={runReminders} disabled={running}><AlarmClock size={15} />{running ? "Running…" : "Run reminders now"}</button>
@@ -90,7 +96,7 @@ const NotificationPage = () => {
                       <td className="px-4 py-2.5"><Pill className="bg-slate-100 text-slate-700">{d.event}</Pill></td>
                       <td className="px-4 py-2.5 whitespace-nowrap">{d.recipient?.name}<span className="block text-xs text-muted">{d.to || "no phone"}</span></td>
                       <td className="px-4 py-2.5 max-w-[240px]"><span className="line-clamp-1">{d.task?.title}</span><span className="block text-xs text-muted line-clamp-2" title={d.message}>{d.message}</span></td>
-                      <td className="px-4 py-2.5"><Pill className={DELIVERY_STYLES[d.status]}>{d.status}</Pill>{d.error && <span className="block text-xs text-red-600 mt-1 max-w-[200px]">{d.error}</span>}</td>
+                      <td className="px-4 py-2.5"><Pill className={DELIVERY_STYLES[d.status] || "bg-slate-100 text-slate-600"}>{d.status}</Pill>{(d.errorCategory || d.error) && <span className={`block text-xs mt-1 max-w-[220px] ${d.status === "Failed" ? "text-red-600" : "text-muted"}`}>{WA_REASONS[d.errorCategory] || d.error || d.errorCategory}</span>}</td>
                       <td className="px-4 py-2.5 text-muted">{d.attempts}</td>
                     </tr>
                   ))}

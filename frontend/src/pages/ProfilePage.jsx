@@ -58,7 +58,7 @@ const ProfilePage = () => {
             <p className="text-sm text-muted">Member since {fmtDate(user?.createdAt)}</p>
           </div>
           <p className="text-sm text-ink flex items-center gap-2"><Mail size={15} className="text-muted" />{user?.email}</p>
-          <p className="text-sm text-ink flex items-center gap-2"><Phone size={15} className="text-muted" />{user?.phone || <span className="text-muted">No WhatsApp number (add one in Settings)</span>}</p>
+          <p className="text-sm text-ink flex items-center gap-2"><Phone size={15} className="text-muted" />{user?.phone && user?.whatsappVerified ? <>{user.phone} <Pill className="bg-emerald-50 text-emerald-700">WhatsApp verified</Pill></> : <span className="text-muted">No verified WhatsApp number (verify one in Settings)</span>}</p>
           {user?.isVerified && <Pill className="bg-emerald-50 text-emerald-700"><ShieldCheck size={12} />Email verified</Pill>}
         </div>
       </div>

@@ -1,37 +1,31 @@
 import { User } from "../models/UserModel.js";
+export { toE164 } from "../services/whatsappVerification.js";
 
-// Accepts +923001234567, 923001234567 or 03001234567 (Pakistan local) and returns E.164, or null
-export const toE164 = (raw) => {
-    if (!raw) return null;
-    let p = String(raw).replace(/[\s\-()]/g, "");
-    if (/^03\d{9}$/.test(p)) p = "+92" + p.slice(1);
-    else if (/^92\d{10}$/.test(p)) p = "+" + p;
-    else if (/^00\d+$/.test(p)) p = "+" + p.slice(2);
-    return /^\+[1-9]\d{7,14}$/.test(p) ? p : null;
-};
+const PREF_KEYS = ["projectAdded", "taskSubmitted", "deadlineReminders", "overdue", "taskUpdates"];
 
+// Notification preferences. The phone number itself can only change through WhatsApp verification.
 export const updateSettings = async (req, res) => {
     try {
-        const { phone, whatsappOptIn } = req.body;
+        const { phone, whatsappOptIn, whatsappPrefs } = req.body;
+        if (phone !== undefined) {
+            return res.status(400).json({ success: false, code: "verification_required", message: "Use WhatsApp verification to add or change your number." });
+        }
         const user = await User.findById(req.userId);
         if (!user) return res.status(404).json({ success: false, message: "User not found" });
 
-        if (phone !== undefined) {
-            if (phone === "") user.phone = undefined;
-            else {
-                const e164 = toE164(phone);
-                if (!e164) return res.status(400).json({ success: false, message: "Enter a valid phone number, e.g. +923001234567" });
-                user.phone = e164;
-            }
-        }
         if (whatsappOptIn !== undefined) {
-            if (whatsappOptIn && !user.phone) return res.status(400).json({ success: false, message: "Add a phone number before enabling WhatsApp" });
+            if (whatsappOptIn && !(user.phone && user.whatsappVerified)) {
+                return res.status(400).json({ success: false, code: "not_verified", message: "Verify your WhatsApp number before turning on WhatsApp notifications." });
+            }
             user.whatsappOptIn = Boolean(whatsappOptIn);
+        }
+        if (whatsappPrefs && typeof whatsappPrefs === "object") {
+            for (const k of PREF_KEYS) if (typeof whatsappPrefs[k] === "boolean") user.whatsappPrefs[k] = whatsappPrefs[k];
         }
         await user.save();
         res.status(200).json({ success: true, message: "Settings saved", user: { ...user._doc, password: undefined } });
     } catch (error) {
-        res.status(500).json({ success: false, message: error.message });
+        res.status(500).json({ success: false, message: "Could not save settings" });
     }
 };
 

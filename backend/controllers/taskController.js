@@ -3,7 +3,10 @@ import { Submission } from "../models/SubmissionModel.js";
 import { CheckIn } from "../models/CheckInModel.js";
 import { User } from "../models/UserModel.js";
 import { RiskAssessment } from "../models/RiskAssessmentModel.js";
-import { logActivity, notify, deliverWhatsApp } from "../services/notificationService.js";
+import { logActivity, notify, deliverWhatsApp, deliverySummary } from "../services/notificationService.js";
+import { notifyTaskSubmitted } from "../services/notificationEvents.js";
+import { whatsappConfig } from "../config/whatsapp.js";
+import { formatDeadline } from "../services/whatsappMessages.js";
 import { assessTask } from "../services/riskService.js";
 
 const USER_FIELDS = "name email profilePicture";
@@ -59,11 +62,12 @@ export const updateTask = async (req, res) => {
         await task.save();
 
         const added = task.assignees.map(String).filter((id) => !before.includes(id));
-        for (const userId of added) {
+        const deadlineText = formatDeadline(task.deadline, whatsappConfig().reminders.timezone);
+        for (const member of await User.find({ _id: { $in: added } }).select("name")) {
             await notify({
-                userId, project: task.project, task: task._id, type: "assigned",
+                userId: member._id, project: task.project, task: task._id, type: "assigned",
                 message: `New task assigned: "${task.title}"`,
-                whatsapp: { dedupeKey: `assigned:${task._id}:${userId}` },
+                whatsapp: { type: "task_assigned", key: `task_assigned:${task._id}:${member._id}`, vars: { memberName: member.name, taskTitle: task.title, projectName: req.project.name, deadlineText } },
             });
         }
         await logActivity({ project: task.project, task: task._id, actor: req.userId, type: "task_updated", message: `updated task "${task.title}"` });
@@ -123,14 +127,10 @@ export const submitTask = async (req, res) => {
         task.lastMeaningfulUpdateAt = new Date();
         await task.save();
 
-        const name = await actorName(req.userId);
         await logActivity({ project: task.project, task: task._id, actor: req.userId, type: "submitted", message: `submitted "${task.title}" for review` });
-        await notify({
-            userId: req.project.lead, project: task.project, task: task._id, type: "submission",
-            message: `${name} submitted "${task.title}" for review`,
-            whatsapp: { dedupeKey: `submission:${submission._id}:${req.project.lead}` },
-        });
-        res.status(201).json({ success: true, message: "Submitted for review", data: submission });
+        // Only reached after the submission and the task were saved
+        const result = await notifyTaskSubmitted({ task, project: req.project, submission, submitterId: req.userId });
+        res.status(201).json({ success: true, message: "Submitted for review", data: { ...submission.toObject(), whatsapp: deliverySummary(result.whatsapp) } });
     } catch (error) {
         res.status(500).json({ success: false, message: error.message });
     }
@@ -170,14 +170,14 @@ export const reviewTask = async (req, res) => {
             type: action === "approve" ? "approved" : "revision_requested",
             message: action === "approve" ? `approved "${task.title}"` : `requested revisions on "${task.title}"`,
         });
-        for (const userId of task.assignees) {
+        for (const member of await User.find({ _id: { $in: task.assignees } }).select("name")) {
             if (action === "approve") {
-                await notify({ userId, project: task.project, task: task._id, type: "approved", message: `"${task.title}" was approved. Great work!` });
+                await notify({ userId: member._id, project: task.project, task: task._id, type: "approved", message: `"${task.title}" was approved. Great work!` });
             } else {
                 await notify({
-                    userId, project: task.project, task: task._id, type: "revision",
+                    userId: member._id, project: task.project, task: task._id, type: "revision",
                     message: `Revision requested on "${task.title}": ${comment}`,
-                    whatsapp: { dedupeKey: `revision:${submission?._id || task._id + "-" + task.revisionCount}:${userId}` },
+                    whatsapp: { type: "revision", key: `revision:${submission?._id || task._id + "-" + task.revisionCount}:${member._id}`, vars: { memberName: member.name, taskTitle: task.title, comment } },
                 });
             }
         }
@@ -243,11 +243,11 @@ export const sendNudge = async (req, res) => {
         if (!recipient || !isAssignee(req.task, recipient)) return res.status(400).json({ success: false, message: "Recipient must be an assignee" });
 
         const { delivery } = await deliverWhatsApp({
-            event: "nudge", recipientId: recipient, project: req.task.project, task: req.task._id,
-            message, dedupeKey: `nudge:${req.task._id}:${recipient}:${Date.now()}`,
+            type: "nudge", recipientId: recipient, project: req.task.project, task: req.task._id,
+            vars: { message }, idempotencyKey: `nudge:${req.task._id}:${recipient}:${Date.now()}`,
         });
         await notify({ userId: recipient, project: req.task.project, task: req.task._id, type: "nudge", message });
-        res.status(200).json({ success: true, message: `WhatsApp: ${delivery.status}`, data: delivery });
+        res.status(200).json({ success: true, message: `WhatsApp: ${delivery.status}`, data: { status: delivery.status, reason: delivery.errorCategory, error: delivery.error } });
     } catch (error) {
         res.status(500).json({ success: false, message: error.message });
     }

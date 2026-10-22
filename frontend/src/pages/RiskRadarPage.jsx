@@ -5,6 +5,7 @@ import { Radar, RefreshCw, Copy, MessageCircle, Sparkles, Cpu, CalendarClock, Li
 import toast from "react-hot-toast";
 import classNames from "classnames";
 import { api, errMsg } from "../lib/api";
+import { describeWhatsApp } from "../lib/whatsapp";
 import { Avatar, LevelBadge, DeadlineChip, EmptyState, Skeleton, Pill, ConfirmDialog, fmtDate, timeAgo } from "../components/ui";
 
 const ACCENT = { High: "border-l-red-400", Medium: "border-l-amber-400", Low: "border-l-emerald-400" };
@@ -26,9 +27,8 @@ const RiskCard = ({ risk, onChanged }) => {
     try {
       const r = await api.post(`/tasks/${task._id}/nudge`, { message, userId: risk.member?._id });
       const status = r.data.data.status;
-      if (status === "Sent") toast.success("Sent on WhatsApp");
-      else if (status === "Simulated") toast.success("WhatsApp simulated (mock mode). See the notification log.");
-      else toast.error(`WhatsApp failed: ${r.data.data.error || "unknown error"}`);
+      const wa = describeWhatsApp({ status, reason: r.data.data.reason }, risk.member?.name?.split(" ")[0]);
+      if (wa) (wa.tone === "error" ? toast.error : wa.tone === "success" ? toast.success : toast)(wa.text);
       setConfirm(false);
     } catch (e) { toast.error(errMsg(e)); } finally { setBusy(false); }
   };

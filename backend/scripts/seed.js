@@ -1,7 +1,8 @@
 // Demo data for TeamPulse AI. Run: npm run seed
 // - Only touches records marked isDemo: true. Real users are never modified or deleted.
 // - Re-running refreshes the demo project so dates stay relative to "now".
-// - Optional DEMO_WHATSAPP_NUMBER (E.164, your own verified number) is set on all demo users.
+// - Optional DEMO_WHATSAPP_NUMBER (E.164, a number you control) is set on all demo users and marked
+//   verified, so demo notifications can reach it without the OTP step. Use only your own number.
 import mongoose from "mongoose";
 import bcryptjs from "bcryptjs";
 import dotenv from "dotenv";
@@ -47,7 +48,7 @@ const run = async () => {
             continue;
         }
         if (!user) user = new User({ email: d.email });
-        Object.assign(user, { name: d.name, password: hashed, isVerified: true, isDemo: true, phone, whatsappOptIn: Boolean(phone) });
+        Object.assign(user, { name: d.name, password: hashed, isVerified: true, isDemo: true, phone, whatsappOptIn: Boolean(phone), whatsappVerified: Boolean(phone) });
         await user.save();
         u[d.key] = user;
     }

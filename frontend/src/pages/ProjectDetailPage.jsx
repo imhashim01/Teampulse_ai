@@ -7,6 +7,7 @@ import classNames from "classnames";
 import { api, errMsg } from "../lib/api";
 import { Modal, EmptyState, SkeletonCards, StatusPill, PriorityPill, DeadlineChip, AvatarStack, Avatar, ProgressBar, fmtDate, timeAgo, fadeIn } from "../components/ui";
 import { ProjectForm } from "./ProjectsPage";
+import { describeWhatsApp } from "../lib/whatsapp";
 
 const PRIORITIES = ["Low", "Medium", "High", "Critical"];
 
@@ -71,6 +72,8 @@ const AddMember = ({ projectId, onAdded }) => {
     try {
       const r = await api.post(`/projects/${projectId}/members`, { email: value });
       toast.success(r.data.message);
+      const wa = describeWhatsApp(r.data.data.whatsapp, r.data.data.name.split(" ")[0]);
+      if (wa) (wa.tone === "error" ? toast.error : toast)(wa.text);
       setEmail(""); setResults([]);
       onAdded();
     } catch (e) { toast.error(errMsg(e)); } finally { setAdding(false); }
